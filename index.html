@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Veran Matematik</title>
+  <style>
+    body { font-family: Arial,sans-serif; max-width:480px; margin:auto; padding:1rem; background:url("/mnt/data/IMG_20250509_181946[1].jpg") no-repeat center/cover; color:#fff; }
+    .overlay { background:rgba(0,0,0,0.6); padding:1rem; border-radius:1rem; }
+    button { padding:0.5rem 1rem; margin:0.5rem; border:none; border-radius:0.5rem; box-shadow:0 2px 5px rgba(0,0,0,0.2); cursor:pointer; }
+    #score { font-size:1.2rem; margin-top:1rem; }
+    #result-list { text-align:left; margin-top:1rem; }
+    #result-list ul { list-style:none; padding:0; }
+    #result-list li.correct { color:#8f8; }
+    #result-list li.wrong { color:#f88; }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <h1>Veran Matematik</h1>
+    <div id="game">
+      <div id="question-container"></div>
+      <div id="buttons-container"></div>
+      <div id="score"></div>
+      <div id="result-list"></div>
+    </div>
+  </div>
+  <script>
+    // 60 kolay 10. sınıf matematik sorusu
+    const textQuestions = [
+      { q:"1. x+3=7 ise x kaçtır?", a:"4" },
+      { q:"2. 2x-5=9 ise x kaçtır?", a:"7" },
+      { q:"3. 3x+2=11 ise x kaçtır?", a:"3" },
+      { q:"4. x/4=2 ise x kaçtır?", a:"8" },
+      { q:"5. 5x=25 ise x kaçtır?", a:"5" },
+      { q:"6. 4x-8=0 ise x kaçtır?", a:"2" },
+      { q:"7. x^2=16 ise x kaç farklı değer alır?", a:"2" },
+      { q:"8. x^2=9 ise x kaçtır?", a:"3" },
+      { q:"9. 2x^2-8=0 ise x kaçtır?", a:"2" },
+      { q:"10. (x+1)(x-1)=0 ise x kaçtır?", a:"1" },
+      { q:"11. x^2-5x+6=0 denkleminin kökleri toplamı kaçtır?", a:"5" },
+      { q:"12. 2x+3y=12, x=3 ise y kaçtır?", a:"2" },
+      { q:"13. 3(x-2)=9 ise x kaçtır?", a:"5" },
+      { q:"14. 4(x+1)=12 ise x kaçtır?", a:"2" },
+      { q:"15. 5x+5=0 ise x kaçtır?", a:"-1" },
+      { q:"16. 6x-3=9 ise x kaçtır?", a:"2" },
+      { q:"17. x^2-4x+4=0 denkleminin tek kökü kaçtır?", a:"2" },
+      { q:"18. 3x^2=27 ise x kaçtır?", a:"3" },
+      { q:"19. x^2+6x+9=0 denkleminin kökü kaçtır?", a:"-3" },
+      { q:"20. f(x)=2x+1, f(3)=kaçtır?", a:"7" },
+      { q:"21. f(x)=x^2, f(4)=kaçtır?", a:"16" },
+      { q:"22. f(x)=x/2, f(8)=kaçtır?", a:"4" },
+      { q:"23. f(x)=x^3, f(2)=kaçtır?", a:"8" },
+      { q:"24. f(x)=5, f(10)=kaçtır?", a:"5" },
+      { q:"25. |−5| kaçtır?", a:"5" },
+      { q:"26. |3−8| kaçtır?", a:"5" },
+      { q:"27. 0!=kaçtır?", a:"1" },
+      { q:"28. 4!=kaçtır?", a:"24" },
+      { q:"29. C(5,2) kaçtır?", a:"10" },
+      { q:"30. P(5,2) kaçtır?", a:"20" },
+      { q:"31. 2+3·4 işleminin sonucu kaçtır?", a:"14" },
+      { q:"32. (2+3)·4 işlemi kaçtır?", a:"20" },
+      { q:"33. 8/2·2 işlemi kaçtır?", a:"8" },
+      { q:"34. (8/2)·2 işlemi kaçtır?", a:"8" },
+      { q:"35. 2^3 işlemi kaçtır?", a:"8" },
+      { q:"36. 3^2 işlemi kaçtır?", a:"9" },
+      { q:"37. √16 kaçtır?", a:"4" },
+      { q:"38. √25 kaçtır?", a:"5" },
+      { q:"39. 5·(−2) işlemi kaçtır?", a:"-10" },
+      { q:"40. −3·(−4) işlemi kaçtır?", a:"12" },
+      { q:"41. 10% kaçtır?", a:"0.1" },
+      { q:"42. 50% kaçtır?", a:"0.5" },
+      { q:"43. 75% kaçtır?", a:"0.75" },
+      { q:"44. 1/4 kesri ondalık kaçtır?", a:"0.25" },
+      { q:"45. 3/5 kesri ondalık kaçtır?", a:"0.6" },
+      { q:"46. 2/3 kesri yaklaşık kaçtır?", a:"0.67" },
+      { q:"47. 1+1/2 işlemi kaçtır?", a:"1.5" },
+      { q:"48. 2+2/3 işlemi kaçtır?", a:"2.67" },
+      { q:"49. (3+1)/2 işlemi kaçtır?", a:"2" },
+      { q:"50. 0.2+0.3 işlemi kaçtır?", a:"0.5" },
+      { q:"51. 0.7−0.2 işlemi kaçtır?", a:"0.5" },
+      { q:"52. 0.9−0.4 işlemi kaçtır?", a:"0.5" },
+      { q:"53. 2x+3y=11, x=2,y=1 işlemi sonucu?", a:"7" },
+      { q:"54. 3x−y=5, x=2,y=1 sonucu?", a:"5" },
+      { q:"55. x^2−9=0 ise x kaçtır?", a:"3" },
+      { q:"56. x^2−4=0 ise x kaçtır?", a:"2" },
+      { q:"57. 2x^2−18=0 ise x kaçtır?", a:"3" },
+      { q:"58. 3x^2−27=0 ise x kaçtır?", a:"3" },
+      { q:"59. x^2+2x+1=0 denklemi kökü kaçtır?", a:"-1" },
+      { q:"60. x^2−6x+9=0 denklemi kökü kaçtır?", a:"3" }
+    ];
+    // 25 kolay 10. sınıf geometri sorusu
+    const geoQuestions = [
+      { q:"61. Üçgenin iç açı toplamı kaçtır?", a:"180" },
+      { q:"62. Dörtgenin iç açı toplamı kaçtır?", a:"360" },
+      { q:"63. Dik açının ölçüsü kaçtır?", a:"90" },
+      { q:"64. Düz açının ölçüsü kaçtır?", a:"180" },
+      { q:"65. Eşkenar üçgenin her açısı kaç derecedir?", a:"60" },
+      { q:"66. Ikizkenar üçgende taban açıları toplamı kaçtır?", a:"120" },
+      { q:"67. Paralelkenarın iç açı toplamı kaçtır?", a:"360" },
+      { q:"68. Yamukta iç açı toplamı kaçtır?", a:"360" },
+      { q:"69. Karede bir açı kaç derecedir?", a:"90" },
+      { q:"70. Dikdörtgende bir açı kaç derecedir?", a:"90" },
+      { q:"71. Çember çevresi formülü kaçtır?", a:"2πr" },
+      { q:"72. Dairenin alan formülü kaçtır?", a:"πr^2" },
+      { q:"73. Hipotenüs formülü (dik kenarlar a,b) kaçtır?", a:"√(a^2+b^2)" },
+      { q:"74. Dairenin çapı yarıçapın kaç katıdır?", a:"2" },
+      { q:"75. Bir açının tamamlayıcısı kaç derecedir?", a:"90" },
+      { q:"76. Bir açının bütünleyeni kaç derecedir?", a:"90" },
+      { q:"77. Bir dış açının ölçüleri toplamı üçgende kaçtır?", a:"360" },
+      { q:"78. Dik açı üçgende hangi kenarın karşısındadır?", a:"Hipotenüs" },
+      { q:"79. Yamukta paralel kenar uzunlukları toplamı kaçtır?", a:"a+b" },
+      { q:"80. Paralelkenarda karşılıklı kenarlar eşit midir?", a:"1" },
+      { q:"81. Çemberde merkez açı ile çevre açı oranı kaçtır?", a:"2" },
+      { q:"82. Bir eşkenar dörtgenin köşegenleri birbirini nasıl keser?", a:"Ortadan" },
+      { q:"83. Bir paralelkenarın köşegeni alanı kaç eş parçaya böler?", a:"2" },
+      { q:"84. Bir üçgende kenarortay sayısı kaçtır?", a:"3" }
+    ];
+    // 25 kolay rastgele soru
+    const extraQuestions = [
+      { q:"85. Dairenin çapı yarıçapın kaç katıdır?", a:"2" },
+      { q:"86. Bir üçgende kenarortay sayısı kaçtır?", a:"3" },
+      { q:"87. Paralelkenarda karşılıklı kenarlar eşit midir?", a:"evet" },
+      { q:"88. 4+4 işlemi kaçtır?", a:"8" },
+      { q:"89. 5+5 işlemi kaçtır?", a:"10" },
+      { q:"90. 6+6 işlemi kaçtır?", a:"12" },
+      { q:"91. 7+7 işlemi kaçtır?", a:"14" },
+      { q:"92. 8+8 işlemi kaçtır?", a:"16" },
+      { q:"93. 9+9 işlemi kaçtır?", a:"18" },
+      { q:"94. 10+10 işlemi kaçtır?", a:"20" },
+      { q:"95. 2·3 işlemi kaçtır?", a:"6" },
+      { q:"96. 3·4 işlemi kaçtır?", a:"12" },
+      { q:"97. 4·5 işlemi kaçtır?", a:"20" },
+      { q:"98. 5·6 işlemi kaçtır?", a:"30" },
+      { q:"99. 6·7 işlemi kaçtır?", a:"42" },
+      { q:"100. 7·8 işlemi kaçtır?", a:"56" }
+    ];
+    const qaList = [...textQuestions, ...geoQuestions, ...extraQuestions];
+    let selected=[], current=0, score=0, correctList=[], wrongList=[];
+    function startGame(){score=0;current=0;correctList=[];wrongList=[];let pool=[...qaList];for(let i=0;i<10;i++){const idx=Math.floor(Math.random()*pool.length);selected.push(pool.splice(idx,1)[0]);}document.getElementById('result-list').innerHTML='';showQuestion();}
+    function showQuestion(){document.getElementById('question-container').innerHTML=`<div class='question'><strong>Soru ${current+1}:</strong> ${selected[current].q}</div>`;document.getElementById('buttons-container').innerHTML="<input id='answer' type='text' placeholder='Cevabınızı girin' />"+"<button onclick='checkAnswer()'>Gönder</button>";document.getElementById('score').textContent=`Puan: ${score}`;}
+    function checkAnswer(){const ans=document.getElementById('answer').value.trim().toLowerCase();const correct=selected[current].a.toString().trim().toLowerCase();if(ans===correct){score+=3;correctList.push(current+1+'. soru');}else{wrongList.push(current+1+'. soru');}current<9?(current++,showQuestion()):endGame();}
+    function endGame(){document.getElementById('question-container').innerHTML=`<div>Oyun bitti! Toplam puanınız: <strong>${score}</strong></div>`;document.getElementById('buttons-container').innerHTML=`<button onclick='startGame()'>Tekrar Oyna</button>`;const r=document.getElementById('result-list');r.innerHTML=`<h3>Doğru Sorularınız:</h3><ul>${correctList.map(q=>`<li class='correct'>${q}</li>`).join('')}</ul><h3>Yanlış Sorularınız:</h3><ul>${wrongList.map(q=>`<li class='wrong'>${q}</li>`).join('')}</ul>`;document.getElementById('score').textContent=`Puan: ${score}`;}startGame();
+  </script>
+</body>
+</html>
